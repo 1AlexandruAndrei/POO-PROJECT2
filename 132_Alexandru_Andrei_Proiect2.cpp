@@ -19,8 +19,8 @@ public:
     Locatie(const Locatie&);
 
     Locatie& operator=(const Locatie&);
-    friend istream& operator>>(istream&, Locatie&);
-    friend ostream& operator<<(ostream&, const Locatie&);
+    friend istream& operator>>(istream&, Locatie& obj);
+    friend ostream& operator<<(ostream&, const Locatie& obj);
 
     int getCapacitate()const
     {
@@ -218,7 +218,13 @@ public:
     }
 
     virtual int capacitate() const=0;
-    virtual ~Club() {}
+
+    ~Club()
+    {
+        nume="";
+        listaLoc.clear();
+        anDeschidere=0;
+    }
 
     int getAnDeschidere() const
     {
@@ -355,6 +361,8 @@ public:
     Nightclub(const Nightclub&);
 
     Nightclub& operator=(const Nightclub&);
+    friend istream& operator>>(istream& in, Nightclub &obj);
+    friend ostream& operator<<(ostream& out, const Nightclub &obj);
     istream& citire(istream& in)
     {
         this->Club::citire(in);
@@ -391,7 +399,7 @@ public:
         return out;
     }
 
-    int capacitate() const
+    virtual int capacitate() const
     {
         int capacitate=0;
         for(int i=0; i<this->listaLoc.size(); i++)
@@ -408,7 +416,11 @@ public:
     {
         return this->vip;
     }
-    virtual ~Nightclub() {}
+    virtual ~Nightclub()
+    {
+        vip=false;
+        listaDans.clear();
+    }
 
 };
 
@@ -444,6 +456,17 @@ Nightclub& Nightclub::operator =(const Nightclub& obj)
     return *this;
 }
 
+istream& operator>>(istream& in, Nightclub& obj)
+{
+    return obj.citire(in);
+}
+
+ostream& operator <<(ostream& out, const Nightclub& obj)
+{
+    return obj.afisare(out);
+}
+
+
 ///-------------------------------------------------------------------
 
 class Lounge: virtual public Club
@@ -458,7 +481,8 @@ public:
     Lounge(const Lounge&);
 
     Lounge& operator=(const Lounge&);
-
+    friend istream& operator >>(istream& in, Lounge& obj);
+    friend ostream& operator <<(ostream& out, const Lounge& obj);
 
     istream& citire(istream& in)
     {
@@ -479,9 +503,7 @@ public:
             in>>this->listaBaut.back();
             cout<<"1.ADD BAUTURA\n";
             cout<<"2.STOP\n";
-
         }
-
         return in;
     }
 
@@ -493,18 +515,24 @@ public:
             out<<this->listaBaut[i]<<endl;
         return out;
     }
-    int capacitate() const
+    virtual int capacitate() const
     {
         int capacitate=0;
         for(int i=0; i<this->listaLoc.size(); i++)
             capacitate+=this->listaLoc[i].getCapacitate();
         return capacitate*1.1;
     }
+
+
     int getConsumatieMinima() const
     {
         return this->consumatieMinima;
     }
-    virtual ~Lounge() {}
+    virtual ~Lounge()
+    {
+        consumatieMinima=0;
+        listaBaut.clear();
+    }
 };
 
 Lounge::Lounge():Club()
@@ -538,6 +566,15 @@ Lounge& Lounge::operator=(const Lounge& obj)
     return *this;
 }
 
+istream& operator>>(istream& in, Lounge& obj)
+{
+    return obj.citire(in);
+}
+
+ostream& operator <<(ostream& out, const Lounge& obj)
+{
+    return obj.afisare(out);
+}
 
 ///-------------------------------------------------------------------
 
@@ -546,6 +583,9 @@ class Megadiscoteca: public Nightclub, public Lounge
 {
     bool happyHour;
 public:
+    friend istream& operator >>(istream& in, Megadiscoteca& obj);
+    friend ostream& operator <<(ostream& out, const Megadiscoteca& obj);
+
     Megadiscoteca()
     {
         this->happyHour=false;
@@ -648,13 +688,9 @@ public:
         return out;
 
     }
-    int capacitate() const
+    virtual int capacitate() const
     {
         return Nightclub::capacitate() + 10 * this->happyHour;
-    }
-    void fMegadiscoteca()
-    {
-        cout<<"metoda\n"<<this->happyHour<<endl;
     }
     virtual ~Megadiscoteca() {}
 
@@ -691,7 +727,6 @@ public:
         cout<<"Clubul este deschis in prezent?\n1=DA 0=NU\n";
         in>>obj.isOpen;
         return in;
-
     }
 
     friend ostream& operator<<(ostream& out, const Nightlife& obj)
@@ -709,8 +744,10 @@ public:
         return this->club;
     }
 
-        ~Nightlife() {}
-
+    ~Nightlife()
+    {
+        delete club;
+    }
 
 };
 
@@ -768,7 +805,7 @@ void District::showCluburi()
 
 void District::showInventar1()
 {
-    for(auto it=inventar.begin();it!=inventar.end();it++)
+    for(auto it=inventar.begin(); it!=inventar.end(); it++)
     {
         cout<<it->getClub()->getNume()<<endl;
     }
@@ -777,7 +814,7 @@ void District::showInventar1()
 int District::showAccess(string inp)
 {
     int ok=0;
-    for(auto it=inventar.begin(); it!=inventar.end();it++)
+    for(auto it=inventar.begin(); it!=inventar.end(); it++)
     {
         if (it->getClub()->getNume() ==inp)
             ok++;
@@ -791,7 +828,7 @@ int District::showAccess(string inp)
 ///anul de deschidere a nunui club
 void District::aflaAn()
 {
-    for(auto it=inventar.begin(); it!=inventar.end();it++)
+    for(auto it=inventar.begin(); it!=inventar.end(); it++)
     {
         cout<<it->getClub()->getAnDeschidere()<<endl;
     }
@@ -934,7 +971,7 @@ int main()
                         system("cls");
 
                         int seconds=10,i;
-                        for(i=seconds;i>=2;i--)
+                        for(i=seconds; i>=2; i--)
                         {
                             cout<<"PETRECEREA DIN LOUNGE INCEPE IN "<<i<<" MINUTE"<<endl;
 
@@ -948,10 +985,10 @@ int main()
 
                         cout<<"WELCOME"<<endl;
 
-                        int notes[]={262, 294, 330, 392, 330, 294, 262, 262, 294, 294, 262, 294, 330, 294, 262};
-                        int durations[]={300, 150, 150, 300, 150, 150, 300, 150, 150, 300, 150, 150, 300, 150, 600};
+                        int notes[]= {262, 294, 330, 392, 330, 294, 262, 262, 294, 294, 262, 294, 330, 294, 262};
+                        int durations[]= {300, 150, 150, 300, 150, 150, 300, 150, 150, 300, 150, 150, 300, 150, 600};
 
-                        for (int i=0;i<15;i++)
+                        for (int i=0; i<15; i++)
                         {
                             Beep(notes[i], durations[i]);
                             Sleep(50);
@@ -1006,7 +1043,7 @@ int main()
                         }
 
                         int seconds=10,i;
-                        for(i=seconds;i>=2;i--)
+                        for(i=seconds; i>=2; i--)
                         {
                             cout<<"PETRECEREA DIN NIGHTCLUB INCEPE IN "<<i<<" MINUTE"<<endl;
 
@@ -1020,7 +1057,7 @@ int main()
                         int notes[] = {330, 392, 523, 659, 784, 659, 523, 392, 330, 392, 523, 659};
                         int durations[] = {300, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 600};
 
-                        for (int i=0;i<12;i++)
+                        for (int i=0; i<12; i++)
                         {
                             Beep(notes[i], durations[i]);
                             Sleep(50);
